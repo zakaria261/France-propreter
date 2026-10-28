@@ -1,0 +1,9 @@
+{
+  "name": "france-proprete-hygiene",
+  "private": true,
+  "description": "Site vitrine France Propreté Hygiène",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "nodemailer": "6.9.16"
+  }
+}
