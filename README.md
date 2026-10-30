@@ -22,3 +22,20 @@ Chaque e-mail reçu a le client en « Répondre à » : il suffit de cliquer sur
 ## En local
 
 Ouvrir `index.html` dans le navigateur. Le formulaire ne s'envoie qu'une fois en ligne : en local, il propose d'écrire par e-mail à la place.
+
+## Film de présentation
+
+Le film est une animation (`video/composition.html`, photos réelles dans `video/media/`) rendue image par image en MP4.
+
+```
+cd video
+npm install
+npm run stills   # quelques images fixes pour vérifier la mise en page
+npm run render   # rend le film en 16:9 et en 9:16
+```
+
+- Versions pour le site : `assets/video/` (16:9 sur ordinateur, 9:16 sur mobile, choisies automatiquement).
+- Versions haute qualité pour les réseaux sociaux : `video/exports/` (non envoyées sur GitHub).
+
+Pour changer un texte, le numéro ou l'e-mail du film : modifier `video/composition.html`, puis relancer `npm run render`.
+Le dossier `video/` n'est pas mis en ligne (voir `.vercelignore`).

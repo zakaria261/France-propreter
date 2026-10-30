@@ -71,7 +71,9 @@ module.exports = async function handler(req, res) {
     tel: champ(body, "tel", 30),
     email: champ(body, "email", 180),
     rappel: champ(body, "rappel", 30),
+    visiteDispo: champ(body, "visite_dispo", 200),
   };
+  const visite = champ(body, "visite") === "oui";
 
   const valide = locaux && d.surface && d.frequence && RE_CP.test(d.cp) && d.ville && d.nom
     && RE_TEL.test(d.tel) && RE_EMAIL.test(d.email) && champ(body, "consent") === "oui";
@@ -102,6 +104,7 @@ module.exports = async function handler(req, res) {
     "Fréquence : " + d.frequence,
     "Lieu : " + d.cp + " " + d.ville,
     "Démarrage : " + (d.date || "non précisé"),
+    "Visite technique : " + (visite ? "OUI, à prévoir" + (d.visiteDispo ? " (disponibilités : " + d.visiteDispo + ")" : "") : "non demandée"),
     "",
     "PRÉCISIONS",
     d.message || "(aucune)",
@@ -122,7 +125,7 @@ module.exports = async function handler(req, res) {
       from: { name: "Site France Propreté Hygiène", address: SMTP_USER },
       to: MAIL_TO || SMTP_USER,
       replyTo: { name: d.nom, address: d.email },
-      subject: `Demande de devis : ${locaux} – ${d.cp} ${d.ville}`,
+      subject: `${visite ? "[Visite à prévoir] " : ""}Demande de devis : ${locaux} – ${d.cp} ${d.ville}`,
       text: texte,
     });
     return repondre(true);

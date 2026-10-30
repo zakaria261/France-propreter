@@ -124,6 +124,58 @@
     });
   }
 
+  /* Accueil : film de présentation (format vertical sur mobile, lecture à l'écran) */
+  var film = document.querySelector(".film");
+  if (film) {
+    var video = film.querySelector("video");
+    var portrait = window.matchMedia("(max-width: 767px)").matches;
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var userPaused = false;
+    var toggleBtn = film.querySelector("[data-film-toggle]");
+    if (portrait) video.poster = video.getAttribute("data-poster-portrait");
+
+    function load() {
+      if (!video.getAttribute("src")) {
+        video.src = video.getAttribute(portrait ? "data-src-portrait" : "data-src-landscape");
+      }
+    }
+    function play() {
+      load();
+      var p = video.play();
+      if (p && p.catch) p.catch(function () {});
+    }
+    function setIcon(paused) {
+      toggleBtn.setAttribute("aria-label", paused ? "Lire la vidéo" : "Mettre en pause");
+      toggleBtn.querySelector("use").setAttribute("href", paused ? "#i-play" : "#i-pause");
+    }
+    video.addEventListener("play", function () { film.classList.add("is-playing", "is-started"); setIcon(false); });
+    video.addEventListener("pause", function () { film.classList.remove("is-playing"); setIcon(true); });
+
+    film.querySelector(".film__play").addEventListener("click", function () { userPaused = false; play(); });
+    video.addEventListener("click", function () {
+      if (video.paused) { userPaused = false; play(); } else { userPaused = true; video.pause(); }
+    });
+    toggleBtn.addEventListener("click", function () {
+      if (video.paused) { userPaused = false; play(); } else { userPaused = true; video.pause(); }
+    });
+    film.querySelector("[data-film-full]").addEventListener("click", function () {
+      load();
+      if (video.requestFullscreen) video.requestFullscreen();
+      else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+      play();
+    });
+
+    // Lecture automatique (sans son) quand le film est à l'écran, pause sinon
+    if (!reduced && "IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting && !userPaused) play();
+          else if (!entry.isIntersecting && !video.paused) video.pause();
+        });
+      }, { threshold: 0.45 }).observe(video);
+    }
+  }
+
   /* ---------- Formulaire de devis ---------- */
   var form = document.getElementById("devis-form");
   if (!form) return;
@@ -236,7 +288,7 @@
     var lines = [];
     var labels = {
       locaux: "Locaux", "prestations[]": "Prestations", surface: "Surface", frequence: "Fréquence",
-      cp: "Code postal", ville: "Ville", date: "Démarrage souhaité", message: "Message",
+      cp: "Code postal", ville: "Ville", date: "Démarrage souhaité", visite: "Visite technique souhaitée", visite_dispo: "Disponibilités visite", message: "Message",
       nom: "Nom", societe: "Société", tel: "Téléphone", email: "E-mail", rappel: "Rappel"
     };
     var grouped = {};

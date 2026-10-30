@@ -27,6 +27,9 @@
   <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 3.5 9 3l1.8 4.5-2.3 1.6a12 12 0 0 0 6.4 6.4l1.6-2.3L21 15l-.5 2.4A3 3 0 0 1 17.6 20 15.6 15.6 0 0 1 4 6.4a3 3 0 0 1 2.6-2.9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-check-circle" viewBox="0 0 28 28"><circle cx="14" cy="14" r="13" fill="currentColor"/><path d="m8.5 14.5 3.6 3.6 7.4-7.6" fill="none" stroke="#0f2c5e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5L8 5.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="m5 5 14 14M19 5 5 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
   <symbol id="logo-mark" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="4.4"><path d="M4.5 24.5 24 7.2l19.5 17.3"/><path d="M34.6 15V6.5"/><path d="M38.5 20.8v21.7H21.5"/></g><path fill="#5cbf4b" d="M8.6 43.2C7 33.6 11.6 26 21.4 24.4c1 9.7-3.6 17.3-12.8 18.8Z"/></symbol>
@@ -75,7 +78,7 @@
   <div class="mobile-menu__foot">
     <a class="btn btn--green btn--block" href="#devis-form">Demander un devis gratuit</a>
     <a class="btn btn--light btn--block" href="tel:+33612345678"><svg aria-hidden="true"><use href="#i-phone"/></svg>06 12 34 56 78</a>
-    <p>contact@france-proprete-hygiene.fr<br>Interventions partout en France</p>
+    <p>Disponibles 7j/7 et 24h/24<br>franceproprete.hygiene@gmail.com<br>Interventions partout en France</p>
   </div>
 </div>
 
@@ -98,7 +101,7 @@
             <div class="progress__bar"><i></i></div>
           </div>
 
-          <form id="devis-form" action="/api/devis" method="post" novalidate data-mail="contact@france-proprete-hygiene.fr">
+          <form id="devis-form" action="/api/devis" method="post" novalidate data-mail="franceproprete.hygiene@gmail.com">
             <div class="form-alert form-alert--error" role="alert"></div>
 
             <div class="hp" aria-hidden="true">
@@ -200,6 +203,17 @@
                 </select>
               </div>
 
+              <div class="field visit">
+                <label class="option option--wide">
+                  <input type="checkbox" name="visite" value="oui" id="visite" aria-controls="visite-detail">
+                  <span><strong>Je souhaite une visite technique sur place</strong><small>Gratuite. Nous évaluons vos locaux avant d'établir le devis.</small></span>
+                </label>
+                <div class="visit__detail" id="visite-detail">
+                  <label for="visite_dispo">Vos disponibilités pour la visite <span class="opt">(facultatif)</span></label>
+                  <input class="input" type="text" id="visite_dispo" name="visite_dispo" maxlength="200" placeholder="Ex. : mardi ou jeudi matin, à partir de 8 h">
+                </div>
+              </div>
+
               <div class="field">
                 <label for="message">Précisions <span class="opt">(facultatif)</span></label>
                 <textarea class="textarea" id="message" name="message" rows="4" placeholder="Nombre de pièces, horaires d'accès, contraintes particulières…"></textarea>
@@ -281,14 +295,14 @@
         <h2>Ce qui se passe ensuite</h2>
         <ul class="ticks">
           <li>Nous étudions votre demande et vous rappelons.</li>
-          <li>Si nécessaire, nous visitons vos locaux, gratuitement.</li>
+          <li>Si vous le souhaitez, nous faisons une visite technique, gratuitement.</li>
           <li>Vous recevez un devis détaillé, tâche par tâche.</li>
           <li>Vous décidez, sans aucun engagement.</li>
         </ul>
         <div class="quote__contact">
-          <p>Vous préférez en parler de vive voix ?</p>
+          <p>Vous préférez en parler de vive voix ? Nous répondons 7j/7 et 24h/24.</p>
           <a href="tel:+33612345678">06 12 34 56 78</a><br>
-          <a class="mail" href="mailto:contact@france-proprete-hygiene.fr">contact@france-proprete-hygiene.fr</a>
+          <a class="mail" href="mailto:franceproprete.hygiene@gmail.com">franceproprete.hygiene@gmail.com</a>
         </div>
       </aside>
 
@@ -332,7 +346,8 @@
         <h3>Contact</h3>
         <ul>
           <li><a href="tel:+33612345678">06 12 34 56 78</a></li>
-          <li><a href="mailto:contact@france-proprete-hygiene.fr">contact@france-proprete-hygiene.fr</a></li>
+          <li><a href="mailto:franceproprete.hygiene@gmail.com">franceproprete.hygiene@gmail.com</a></li>
+          <li>7j/7 et 24h/24</li>
           <li>Partout en France</li>
         </ul>
       </div>
