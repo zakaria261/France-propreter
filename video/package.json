@@ -4,9 +4,12 @@
   "description": "Rendu du film de présentation France Propreté Hygiène",
   "scripts": {
     "stills": "node render.js stills",
-    "render": "node render.js"
+    "render": "node render.js",
+    "voix": "node --env-file=../.env.local voiceover.mjs",
+    "mux": "node render.js mux"
   },
   "devDependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.75.0",
     "ffmpeg-static": "5.2.0",
     "gsap": "3.12.5",
     "puppeteer": "23.11.1"

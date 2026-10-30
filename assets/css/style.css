@@ -829,3 +829,22 @@ body.has-action-bar { padding-bottom: calc(74px + env(safe-area-inset-bottom)); 
 @media (min-width: 640px) {
   .film__ctas { display: flex; justify-content: center; }
 }
+
+.film__sound {
+  position: absolute; left: 14px; bottom: 14px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 16px 0 12px; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--white); color: var(--ink); font-weight: 700; font-size: 0.9375rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  opacity: 0; transition: opacity .25s, transform .25s var(--ease);
+}
+.film__sound svg { width: 20px; height: 20px; }
+.film.is-started .film__sound { opacity: 1; }
+.film__sound[aria-pressed="true"] { background: rgba(5, 16, 31, 0.6); color: var(--white); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.film__sound:hover { transform: translateY(-1px); }
+
+/* Sur mobile, la barre d'action fixe recouvre le bas de la vidéo : boutons en haut */
+@media (max-width: 1023px) {
+  .film__sound { top: 12px; bottom: auto; left: 12px; }
+  .film__controls { top: 12px; bottom: auto; right: 12px; }
+}

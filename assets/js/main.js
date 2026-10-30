@@ -144,6 +144,18 @@
       var p = video.play();
       if (p && p.catch) p.catch(function () {});
     }
+    var soundBtn = film.querySelector("[data-film-sound]");
+    function setSound(on) {
+      video.muted = !on;
+      soundBtn.setAttribute("aria-pressed", on ? "true" : "false");
+      soundBtn.querySelector("use").setAttribute("href", on ? "#i-sound-on" : "#i-sound-off");
+      soundBtn.querySelector("span").textContent = on ? "Couper le son" : "Activer le son";
+    }
+    soundBtn.addEventListener("click", function () {
+      setSound(video.muted);
+      if (video.paused) { userPaused = false; play(); }
+    });
+
     function setIcon(paused) {
       toggleBtn.setAttribute("aria-label", paused ? "Lire la vidéo" : "Mettre en pause");
       toggleBtn.querySelector("use").setAttribute("href", paused ? "#i-play" : "#i-pause");
@@ -151,7 +163,8 @@
     video.addEventListener("play", function () { film.classList.add("is-playing", "is-started"); setIcon(false); });
     video.addEventListener("pause", function () { film.classList.remove("is-playing"); setIcon(true); });
 
-    film.querySelector(".film__play").addEventListener("click", function () { userPaused = false; play(); });
+    // Un clic explicite sur « lire » ou « plein écran » lance la vidéo avec le son
+    film.querySelector(".film__play").addEventListener("click", function () { userPaused = false; setSound(true); play(); });
     video.addEventListener("click", function () {
       if (video.paused) { userPaused = false; play(); } else { userPaused = true; video.pause(); }
     });
@@ -162,6 +175,7 @@
       load();
       if (video.requestFullscreen) video.requestFullscreen();
       else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+      setSound(true);
       play();
     });
 

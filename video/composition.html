@@ -263,6 +263,7 @@
 </div>
 
 <script src="gsap.min.js"></script>
+<script src="audio/timing.js" onerror="void 0"></script>
 <script>
   if (innerHeight > innerWidth) document.documentElement.classList.add("portrait");
   const portrait = innerHeight > innerWidth;
@@ -306,38 +307,48 @@
     tl.set(sel, { visibility: "hidden" }, t + 1.2);
   }
 
-  /* 1. Ouverture : 0 → 5 s */
+  // Minutage des scènes : écrit par voiceover.mjs (audio/timing.js) pour suivre la voix off,
+  // sinon valeurs par défaut du film muet.
+  const T = window.TIMING || {
+    lineB: 3.0, s2: 4.9, s3: 9.0,
+    slides: [10.6, 12.35, 14.1, 15.85, 17.6, 19.35], s4: 21.1, s5: 25.6, s6: 30.8, end: 36.8,
+  };
+
+  /* 1. Ouverture */
   show(".s1", 0);
   reveal(inner(".s1__time"), 0.15, { duration: 1.1 });
-  tl.to(".s1__time .colon", { opacity: 0.15, duration: 0.01, repeat: 7, yoyo: true, repeatDelay: 0.49, ease: "none" }, 0.6);
+  tl.to(".s1__time .colon", { opacity: 0.15, duration: 0.01, repeat: Math.round(T.lineB * 2), yoyo: true, repeatDelay: 0.49, ease: "none" }, 0.6);
   reveal(inner(".s1__a"), 0.7);
-  tl.to(".s1__photo", { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "power4.inOut" }, 2.0);
-  tl.to(".s1__shade", { opacity: 1, duration: 1.2, ease: "power2.out" }, 2.6);
-  tl.fromTo(".s1__photo img", { scale: 1.3 }, { scale: 1.04, duration: 3.4, ease: "power2.out" }, 2.0);
-  conceal(inner(".s1__a"), 2.5);
-  reveal(inner(".s1__b"), 3.0);
-  wipe(".wipe--navy", 4.4, ["x", -100], 100, ".s1", ".s2");
+  const photo = T.lineB - 1.0;
+  tl.to(".s1__photo", { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "power4.inOut" }, photo);
+  tl.to(".s1__shade", { opacity: 1, duration: 1.2, ease: "power2.out" }, photo + 0.6);
+  tl.fromTo(".s1__photo img", { scale: 1.3 }, { scale: 1.04, duration: T.s2 - photo, ease: "power2.out" }, photo);
+  conceal(inner(".s1__a"), T.lineB - 0.5);
+  reveal(inner(".s1__b"), T.lineB);
+  wipe(".wipe--navy", T.s2 - 0.5, ["x", -100], 100, ".s1", ".s2");
 
-  /* 2. Marque : 4.9 → 9 s */
-  tl.to(".draw", { strokeDashoffset: 0, duration: 0.9, stagger: 0.12, ease: "power2.inOut" }, 5.0);
-  tl.to(".leaf", { scale: 1, duration: 0.7, ease: "back.out(2)" }, 5.6);
-  tl.to(".brand__name .ch", { yPercent: 0, duration: 0.9, stagger: 0.05 }, 5.7);
-  reveal(inner(".brand__sub"), 6.1);
-  tl.to(".brand__rule", { scaleX: 1, duration: 0.9, ease: "power3.inOut" }, 6.4);
-  reveal(inner(".brand__tag"), 6.8);
-  tl.fromTo(".brand", { scale: 1 }, { scale: 1.05, duration: 4, ease: "none" }, 5.0);
-  wipe(".wipe--green", 8.5, ["y", 100], -100, ".s2", ".s3");
+  /* 2. Marque */
+  const b2 = T.s2;
+  tl.to(".draw", { strokeDashoffset: 0, duration: 0.9, stagger: 0.12, ease: "power2.inOut" }, b2 + 0.1);
+  tl.to(".leaf", { scale: 1, duration: 0.7, ease: "back.out(2)" }, b2 + 0.7);
+  tl.to(".brand__name .ch", { yPercent: 0, duration: 0.9, stagger: 0.05 }, b2 + 0.8);
+  reveal(inner(".brand__sub"), b2 + 1.2);
+  tl.to(".brand__rule", { scaleX: 1, duration: 0.9, ease: "power3.inOut" }, b2 + 1.5);
+  reveal(inner(".brand__tag"), b2 + 1.9);
+  tl.fromTo(".brand", { scale: 1 }, { scale: 1.05, duration: T.s3 - b2, ease: "none" }, b2);
+  wipe(".wipe--green", T.s3 - 0.5, ["y", 100], -100, ".s2", ".s3");
 
-  /* 3. Prestations : 9 → 20.9 s */
-  reveal(inner(".s3__kicker"), 9.05);
-  reveal(inner(".s3__big"), 9.15, { stagger: 0.12 });
+  /* 3. Prestations */
+  reveal(inner(".s3__kicker"), T.s3 + 0.05);
+  reveal(inner(".s3__big"), T.s3 + 0.15, { stagger: 0.12 });
   const slides = $$(".slide");
-  const step = 1.75, start = 10.6;
+  const start = T.slides[0];
   show(".progress", start);
   show(".hud", start);
   tl.fromTo(".hud", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6 }, start + 0.3);
   slides.forEach((s, i) => {
-    const t = start + i * step;
+    const t = T.slides[i];
+    const step = (T.slides[i + 1] ?? T.s4) - t;
     tl.set(s, { visibility: "visible" }, t);
     tl.to(s, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.65, ease: "power4.inOut" }, t);
     tl.fromTo($("img", s), { scale: 1.22, xPercent: i % 2 ? -2 : 2 }, { scale: 1.04, xPercent: 0, duration: step + 0.8, ease: "power2.out" }, t);
@@ -347,40 +358,40 @@
     tl.to($$(".progress b")[i], { scaleX: 1, duration: step, ease: "none" }, t);
     if (i > 0) tl.set(slides[i - 1], { visibility: "hidden" }, t + 0.7);
   });
-  const end3 = start + slides.length * step; // 21.1
+  const end3 = T.s4;
 
-  /* 4. Décapage : 21.1 → 25.6 s */
+  /* 4. Décapage */
   show(".s4", end3);
   tl.set(".s4", { zIndex: 2 }, end3);
   const ax = portrait ? "xPercent" : "yPercent";
   tl.fromTo(".s4__half--a", { [ax]: -100 }, { [ax]: 0, duration: 0.8, ease: "power4.inOut" }, end3);
   tl.fromTo(".s4__half--b", { [ax]: 100 }, { [ax]: 0, duration: 0.8, ease: "power4.inOut" }, end3);
-  tl.fromTo(".s4__half img", { scale: 1.25 }, { scale: 1.05, duration: 4.5, ease: "power2.out" }, end3);
+  tl.fromTo(".s4__half img", { scale: 1.25 }, { scale: 1.05, duration: T.s5 - end3, ease: "power2.out" }, end3);
   tl.fromTo(".s4__shade", { opacity: 0 }, { opacity: 1, duration: 0.8 }, end3 + 0.4);
   hide(".s3, .s3 .slide, .progress", end3 + 0.8);
   reveal(inner(".s4__kicker"), end3 + 0.8);
   reveal(inner(".s4__big"), end3 + 0.9, { duration: 1.1 });
   reveal(inner(".s4__mid"), end3 + 1.15);
   reveal(inner(".s4__sub"), end3 + 1.5);
-  wipe(".wipe--navy", end3 + 4.0, ["x", 100], -100, ".s4", ".s5");
+  wipe(".wipe--navy", T.s5 - 0.5, ["x", 100], -100, ".s4", ".s5");
 
-  /* 5. Engagement : 25.6 → 31 s */
-  const t5 = end3 + 4.5;
+  /* 5. Engagement */
+  const t5 = T.s5;
   tl.to(".s5__photo", { clipPath: "inset(0% 0% 0% 0% round 14px)", duration: 1.1, ease: "power4.inOut" }, t5 + 0.1);
-  tl.fromTo(".s5__photo img", { scale: 1.3 }, { scale: 1.05, duration: 5, ease: "power2.out" }, t5 + 0.1);
+  tl.fromTo(".s5__photo img", { scale: 1.3 }, { scale: 1.05, duration: T.s6 - t5, ease: "power2.out" }, t5 + 0.1);
   tl.to(".s5__live", { autoAlpha: 1, y: 0, duration: 0.7 }, t5 + 0.2);
-  tl.to(".s5__dot", { boxShadow: "0 0 0 18px rgba(92,191,75,0)", duration: 1.2, repeat: 3, ease: "power1.out" }, t5 + 0.4);
+  tl.to(".s5__dot", { boxShadow: "0 0 0 18px rgba(92,191,75,0)", duration: 1.2, repeat: Math.floor((T.s6 - t5) / 1.2) - 1, ease: "power1.out" }, t5 + 0.4);
   reveal(inner(".s5__h1"), t5 + 0.35);
   reveal(inner(".s5__h2"), t5 + 0.55, { duration: 1.1 });
   tl.to(".s5__list li", { autoAlpha: 1, x: 0, duration: 0.7, stagger: 0.28 }, t5 + 1.4);
 
-  /* 6. Appel à l'action : 31 → 37 s */
-  const t6 = t5 + 5.2;
+  /* 6. Appel à l'action */
+  const t6 = T.s6;
   tl.to(".hud", { autoAlpha: 0, duration: 0.4 }, t6 - 0.2);
   show(".s6", t6);
   tl.set(".s6", { zIndex: 3 }, t6);
   tl.to(".s6", { clipPath: "circle(75% at 50% 50%)", duration: 1.0, ease: "power3.inOut" }, t6);
-  tl.fromTo(".s6 .fill img", { scale: 1.25 }, { scale: 1.05, duration: 6, ease: "power1.out" }, t6);
+  tl.fromTo(".s6 .fill img", { scale: 1.25 }, { scale: 1.05, duration: T.end - t6, ease: "power1.out" }, t6);
   hide(".s5", t6 + 1.0);
   tl.to(".s6__brand", { autoAlpha: 1, y: 0, duration: 0.8 }, t6 + 0.6);
   reveal(inner(".s6__h"), t6 + 0.75, { stagger: 0.12, duration: 1.1 });
@@ -388,7 +399,7 @@
   tl.to(".s6__phone", { autoAlpha: 1, y: 0, duration: 0.8 }, t6 + 1.7);
   tl.to(".s6__meta, .s6__mail", { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.12 }, t6 + 1.9);
   tl.to(".s6__btn", { scale: 1.05, duration: 0.5, repeat: 3, yoyo: true, ease: "sine.inOut" }, t6 + 2.8);
-  tl.to({}, { duration: 0.01 }, t6 + 6.0);
+  tl.to({}, { duration: 0.01 }, T.end);
 
   window.DURATION = tl.duration();
   window.seek = (t) => { tl.seek(t, false); };
