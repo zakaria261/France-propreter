@@ -317,7 +317,7 @@
   function showError() {
     var mail = form.getAttribute("data-mail");
     var href = "mailto:" + mail + "?subject=" + encodeURIComponent("Demande de devis") + "&body=" + encodeURIComponent(summary());
-    alertBox.innerHTML = "L'envoi n'a pas abouti. Vous pouvez <a href=\"" + href + "\">nous écrire directement</a> (votre demande est déjà rédigée) ou nous appeler au <a href=\"tel:+33612345678\">06 12 34 56 78</a>.";
+    alertBox.innerHTML = "L'envoi n'a pas abouti. Vous pouvez <a href=\"" + href + "\">nous écrire directement</a> (votre demande est déjà rédigée) ou nous appeler au <a href=\"tel:+33781153817\">+33 7 81 15 38 17</a>.";
     alertBox.classList.add("is-visible");
     alertBox.scrollIntoView({ behavior: "smooth", block: "center" });
   }
