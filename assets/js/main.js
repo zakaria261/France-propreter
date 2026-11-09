@@ -387,7 +387,11 @@
       body: JSON.stringify(payload),
       headers: { "Content-Type": "application/json", "Accept": "application/json" }
     })
-      .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, body: j }; }); })
+      .then(function (res) {
+        return res.json().then(function (j) { return { ok: res.ok, body: j }; }, function () { return { ok: false, body: { error: "configuration" } }; });
+      })
+      // Serveur absent (site déplacé chez un hébergeur sans fonctions Vercel) : même chose que sans configuration
+      .catch(function () { return { ok: false, body: { error: "configuration" } }; })
       .then(function (r) {
         // Pas de boîte mail configurée sur le serveur : la page envoie elle-même par FormSubmit
         return r.body.error === "configuration" ? viaFormSubmit() : r;
