@@ -1,8 +1,12 @@
 /**
  * France Propreté Hygiène — envoi des demandes de devis (fonction Vercel).
- * Reçoit le formulaire (JSON ou formulaire classique) et l'envoie par e-mail via SMTP.
+ * Reçoit le formulaire (JSON ou formulaire classique) et l'envoie par e-mail :
+ *   - via SMTP si les variables ci-dessous sont renseignées sur Vercel ;
+ *   - sinon via FormSubmit (formsubmit.co), qui transfère la demande à MAIL_TO
+ *     ou à l'adresse de contact. FormSubmit demande une seule activation, par un
+ *     lien reçu dans cette boîte au premier envoi.
  *
- * Variables d'environnement (Vercel > Settings > Environment Variables) :
+ * Variables d'environnement (Vercel > Settings > Environment Variables), toutes facultatives :
  *   SMTP_HOST   ex. smtp.gmail.com
  *   SMTP_PORT   ex. 465
  *   SMTP_USER   adresse de connexion à la boîte mail
@@ -10,6 +14,8 @@
  *   MAIL_TO     adresse qui reçoit les demandes (par défaut SMTP_USER)
  */
 const nodemailer = require("nodemailer");
+
+const CONTACT = "franceproprete.hygiene@gmail.com";
 
 const LOCAUX = {
   bureaux: "Bureaux", copropriete: "Copropriété, résidence", commerce: "Commerce, magasin",
@@ -80,19 +86,7 @@ module.exports = async function handler(req, res) {
   if (!valide) return repondre(false, "validation", 422);
 
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, MAIL_TO } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-    console.error("Configuration SMTP manquante");
-    return repondre(false, "configuration", 500);
-  }
-
-  const port = Number(SMTP_PORT) || 465;
-  const transport = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port,
-    secure: port === 465,
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
-  });
-
+  const sujet = `${visite ? "[Visite à prévoir] " : ""}Demande de devis : ${locaux} – ${d.cp} ${d.ville}`;
   const date = new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris", dateStyle: "short", timeStyle: "short" });
   const texte = [
     "Nouvelle demande de devis depuis le site",
@@ -121,16 +115,58 @@ module.exports = async function handler(req, res) {
   ].join("\n");
 
   try {
-    await transport.sendMail({
-      from: { name: "Site France Propreté Hygiène", address: SMTP_USER },
-      to: MAIL_TO || SMTP_USER,
-      replyTo: { name: d.nom, address: d.email },
-      subject: `${visite ? "[Visite à prévoir] " : ""}Demande de devis : ${locaux} – ${d.cp} ${d.ville}`,
-      text: texte,
-    });
+    if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+      const port = Number(SMTP_PORT) || 465;
+      const transport = nodemailer.createTransport({
+        host: SMTP_HOST,
+        port,
+        secure: port === 465,
+        auth: { user: SMTP_USER, pass: SMTP_PASS },
+      });
+      await transport.sendMail({
+        from: { name: "Site France Propreté Hygiène", address: SMTP_USER },
+        to: MAIL_TO || SMTP_USER,
+        replyTo: { name: d.nom, address: d.email },
+        subject: sujet,
+        text: texte,
+      });
+    } else {
+      await viaFormSubmit(MAIL_TO || CONTACT, req, {
+        _subject: sujet,
+        _replyto: d.email,
+        _template: "table",
+        _captcha: "false",
+        "Type de locaux": locaux,
+        "Prestations": prestations.length ? prestations.join(", ") : "non précisé",
+        "Surface": d.surface,
+        "Fréquence": d.frequence,
+        "Lieu": d.cp + " " + d.ville,
+        "Démarrage": d.date || "non précisé",
+        "Visite technique": visite ? "OUI, à prévoir" + (d.visiteDispo ? " (disponibilités : " + d.visiteDispo + ")" : "") : "non demandée",
+        "Précisions": d.message || "(aucune)",
+        "Nom": d.nom,
+        "Société": d.societe || "-",
+        "Téléphone": d.tel,
+        "E-mail": d.email,
+        "Rappel": d.rappel || "indifférent",
+        "Envoyé le": date,
+      });
+    }
     return repondre(true);
   } catch (err) {
     console.error("Échec de l'envoi :", err.message);
     return repondre(false, "envoi", 500);
   }
 };
+
+// Transfert par FormSubmit : la demande arrive dans la boîte `to`, avec le client en « Répondre à »
+async function viaFormSubmit(to, req, fields) {
+  const site = "https://" + (req.headers["x-forwarded-host"] || req.headers.host);
+  const res = await fetch("https://formsubmit.co/ajax/" + encodeURIComponent(to), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json", Referer: site + "/devis", Origin: site },
+    body: JSON.stringify(fields),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (String(json.success) !== "true") throw new Error("FormSubmit : " + (json.message || res.status));
+}
