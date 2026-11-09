@@ -39,3 +39,17 @@ npm run render   # rend le film en 16:9 et en 9:16
 
 Pour changer un texte, le numéro ou l'e-mail du film : modifier `video/composition.html`, puis relancer `npm run render`.
 Le dossier `video/` n'est pas mis en ligne (voir `.vercelignore`).
+
+## Reel Instagram (avant / après)
+
+Reel vertical 1080 × 1920 de 36 s : avant / après animés, typographie calée sur la voix, bruitages et boucle rythmique.
+Sources : `video/reel/reel.html` (animation), `video/reel/audio.mjs` (voix, bruitages, musique, minutage), `video/reel/tex/` (textures de saleté).
+
+```
+cd video
+npm run reel:audio   # génère la bande son avec ElevenLabs (clé dans ../.env.local) et fixe le minutage
+npm run reel         # rend video/exports/reel-instagram.mp4
+```
+
+Les « avant » sont simulés à partir de photos d'illustration (mention « Images d'illustration » à l'écran).
+Pour utiliser de vraies photos de chantier : remplacer les images dans `reel/reel.html` (balises `before` / `after`) et retirer la mention.

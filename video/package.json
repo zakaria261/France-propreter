@@ -6,7 +6,10 @@
     "stills": "node render.js stills",
     "render": "node render.js",
     "voix": "node --env-file=../.env.local voiceover.mjs",
-    "mux": "node render.js mux"
+    "mux": "node render.js mux",
+    "reel:audio": "node --env-file=../.env.local reel/audio.mjs",
+    "reel": "node render.js reel",
+    "reel:stills": "node render.js reel-stills"
   },
   "devDependencies": {
     "@elevenlabs/elevenlabs-js": "^2.75.0",
