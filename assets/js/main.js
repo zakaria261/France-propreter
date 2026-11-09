@@ -1,4 +1,4 @@
-/* France Propreté Hygiène — interactions */
+/* Rhône-Alpes Propreté Hygiène — interactions */
 (function () {
   "use strict";
 

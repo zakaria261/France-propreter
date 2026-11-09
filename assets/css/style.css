@@ -848,3 +848,10 @@ body.has-action-bar { padding-bottom: calc(74px + env(safe-area-inset-bottom)); 
   .film__sound { top: 12px; bottom: auto; left: 12px; }
   .film__controls { top: 12px; bottom: auto; right: 12px; }
 }
+
+/* Nom « RHÔNE-ALPES » : toujours sur une ligne, un peu plus compact sur mobile */
+.logo__name { white-space: nowrap; }
+@media (max-width: 1023px) {
+  .logo__name { font-size: 1.125rem; font-stretch: 100%; }
+  .logo__sub { font-size: 0.625rem; }
+}

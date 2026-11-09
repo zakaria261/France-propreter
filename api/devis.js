@@ -1,5 +1,5 @@
 /**
- * France Propreté Hygiène — envoi des demandes de devis (fonction Vercel).
+ * Rhône-Alpes Propreté Hygiène — envoi des demandes de devis (fonction Vercel).
  * Reçoit le formulaire (JSON ou formulaire classique) et l'envoie par e-mail via SMTP.
  *
  * Variables d'environnement (Vercel > Settings > Environment Variables) :
@@ -122,7 +122,7 @@ module.exports = async function handler(req, res) {
 
   try {
     await transport.sendMail({
-      from: { name: "Site France Propreté Hygiène", address: SMTP_USER },
+      from: { name: "Site Rhône-Alpes Propreté Hygiène", address: SMTP_USER },
       to: MAIL_TO || SMTP_USER,
       replyTo: { name: d.nom, address: d.email },
       subject: `${visite ? "[Visite à prévoir] " : ""}Demande de devis : ${locaux} – ${d.cp} ${d.ville}`,
