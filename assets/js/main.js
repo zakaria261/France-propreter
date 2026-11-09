@@ -314,6 +314,45 @@
     return lines.join("\n");
   }
 
+  // Envoi par FormSubmit (formsubmit.co) : la demande arrive dans la boîte de data-mail,
+  // présentée en tableau, avec le client en « Répondre à ».
+  function viaFormSubmit() {
+    var get = function (name) { var el = form.elements[name]; return el && el.value ? el.value.trim() : ""; };
+    var label = function (input) { return input.nextElementSibling.textContent.trim(); };
+    var checked = form.querySelector('input[name="locaux"]:checked');
+    var locaux = checked ? label(checked) : "";
+    var prestations = Array.prototype.map.call(form.querySelectorAll('input[name="prestations[]"]:checked'), label);
+    var visite = form.elements.visite && form.elements.visite.checked;
+    var rappel = form.querySelector('input[name="rappel"]:checked');
+    var fields = {
+      _subject: (visite ? "[Visite à prévoir] " : "") + "Demande de devis : " + locaux + " – " + get("cp") + " " + get("ville"),
+      _replyto: get("email"),
+      _template: "table",
+      _captcha: "false",
+      _honey: get("site_web"),
+      "Type de locaux": locaux,
+      "Prestations": prestations.length ? prestations.join(", ") : "non précisé",
+      "Surface": get("surface"),
+      "Fréquence": get("frequence"),
+      "Lieu": get("cp") + " " + get("ville"),
+      "Démarrage": get("date") || "non précisé",
+      "Visite technique": visite ? "OUI, à prévoir" + (get("visite_dispo") ? " (disponibilités : " + get("visite_dispo") + ")" : "") : "non demandée",
+      "Précisions": get("message") || "(aucune)",
+      "Nom": get("nom"),
+      "Société": get("societe") || "-",
+      "Téléphone": get("tel"),
+      "E-mail": get("email"),
+      "Rappel": rappel ? rappel.value : "indifférent"
+    };
+    return fetch("https://formsubmit.co/ajax/" + encodeURIComponent(form.getAttribute("data-mail")), {
+      method: "POST",
+      body: JSON.stringify(fields),
+      headers: { "Content-Type": "application/json", "Accept": "application/json" }
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (j) { return { ok: String(j.success) === "true", body: { ok: String(j.success) === "true" } }; });
+  }
+
   function showError() {
     var mail = form.getAttribute("data-mail");
     var href = "mailto:" + mail + "?subject=" + encodeURIComponent("Demande de devis") + "&body=" + encodeURIComponent(summary());
@@ -349,6 +388,10 @@
       headers: { "Content-Type": "application/json", "Accept": "application/json" }
     })
       .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, body: j }; }); })
+      .then(function (r) {
+        // Pas de boîte mail configurée sur le serveur : la page envoie elle-même par FormSubmit
+        return r.body.error === "configuration" ? viaFormSubmit() : r;
+      })
       .then(function (r) {
         if (!r.ok || !r.body.ok) throw new Error("send");
         var tpl = document.getElementById("form-success");
