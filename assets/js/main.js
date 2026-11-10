@@ -344,10 +344,13 @@
       "E-mail": get("email"),
       "Rappel": rappel ? rappel.value : "indifférent"
     };
+    // Corps « formulaire » et en-tête Accept seul : requête simple, sans vérification CORS préalable
+    // (FormSubmit met parfois plus de 20 s à y répondre). keepalive : l'envoi continue si la page se ferme.
     return fetch("https://formsubmit.co/ajax/" + encodeURIComponent(form.getAttribute("data-mail")), {
       method: "POST",
-      body: JSON.stringify(fields),
-      headers: { "Content-Type": "application/json", "Accept": "application/json" }
+      body: new URLSearchParams(fields),
+      headers: { "Accept": "application/json" },
+      keepalive: true
     })
       .then(function (res) { return res.json(); })
       .then(function (j) { return { ok: String(j.success) === "true", body: { ok: String(j.success) === "true" } }; });
@@ -382,6 +385,26 @@
       else payload[k] = v;
     });
 
+    // Le visiteur n'attend pas plus de 4 s : passé ce délai, le message de remerciement s'affiche
+    // et l'envoi se termine en arrière-plan. Une erreur tardive est signalée dans ce même cadre.
+    var draft = summary();
+    var shown = false;
+    function success() {
+      if (shown) return;
+      shown = true;
+      var tpl = document.getElementById("form-success");
+      card.innerHTML = "";
+      card.appendChild(tpl.content.cloneNode(true));
+      scrollToForm();
+      card.querySelector(".form-success").focus({ preventScroll: true });
+    }
+    function lateError() {
+      var href = "mailto:" + form.getAttribute("data-mail") + "?subject=" + encodeURIComponent("Demande de devis") + "&body=" + encodeURIComponent(draft);
+      card.innerHTML = '<div class="form-alert form-alert--error is-visible" role="alert">Votre demande n\'a finalement pas pu être transmise. <a href="' + href + '">Envoyez-la par e-mail</a> (elle est déjà rédigée) ou appelez-nous au <a href="tel:+33781153817">+33 7 81 15 38 17</a>.</div>';
+      scrollToForm();
+    }
+    var timer = setTimeout(success, 4000);
+
     fetch(form.getAttribute("action"), {
       method: "POST",
       body: JSON.stringify(payload),
@@ -397,14 +420,13 @@
         return r.body.error === "configuration" ? viaFormSubmit() : r;
       })
       .then(function (r) {
+        clearTimeout(timer);
         if (!r.ok || !r.body.ok) throw new Error("send");
-        var tpl = document.getElementById("form-success");
-        card.innerHTML = "";
-        card.appendChild(tpl.content.cloneNode(true));
-        scrollToForm();
-        card.querySelector(".form-success").focus({ preventScroll: true });
+        success();
       })
       .catch(function () {
+        clearTimeout(timer);
+        if (shown) return lateError();
         btn.classList.remove("is-loading");
         btn.querySelector("span").textContent = "Envoyer ma demande";
         showError();
